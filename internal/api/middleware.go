@@ -12,9 +12,9 @@ import (
 // Key type for context
 type contextKey string
 
-const userCtxKey contextKey = "user_id"
+const userCtxKey contextKey = "sub"
 
-// Validates the JWT and injects user_id into the request context
+// Validates the JWT and injects user ID into the request context
 func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Extract Authorization header
@@ -36,22 +36,22 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// Extract user_id from claims
+		// Extract sub from claims
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 			return
 		}
 
-		userIDFloat, ok := claims["user_id"].(float64)
+		subFloat, ok := claims["sub"].(float64)
 		if !ok {
-			http.Error(w, "Invalid user_id in token", http.StatusUnauthorized)
+			http.Error(w, "Invalid sub in token", http.StatusUnauthorized)
 			return
 		}
 
-		userID := int(userIDFloat)
+		userID := int(subFloat)
 
-		// Inject user_id into request context
+		// Inject user ID into request context using "sub" as key
 		ctx := context.WithValue(r.Context(), userCtxKey, userID)
 
 		// Call next handler
@@ -59,7 +59,7 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// Extracts user_id from context
+// Extracts user ID from context
 func userIDFromContext(ctx context.Context) (int, bool) {
 	userID, ok := ctx.Value(userCtxKey).(int)
 	return userID, ok

@@ -57,8 +57,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request, dbpool *pgxpool.Pool) 
 	// Create JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"user_id": id,
-			"exp":     time.Now().Add(time.Hour * 1).Unix(), // Token expires after 1 hour
+			"sub": id,
+			"exp": time.Now().Add(time.Minute * 10).Unix(), // Token expires after 10 minutes
 		})
 
 	tokenString, err := token.SignedString(jwtSecret)
