@@ -1,21 +1,15 @@
--- Dev
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS accounts CASCADE;
-DROP TABLE IF EXISTS transactions CASCADE;
---
-
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE accounts (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(id),
+    account_name VARCHAR(20) NOT NULL,
     account_number VARCHAR(20) UNIQUE NOT NULL,
     balance NUMERIC(15,2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -27,20 +21,17 @@ CREATE TABLE transactions (
     from_account_id INT REFERENCES accounts(id) ON DELETE SET NULL,
     to_account_id INT REFERENCES accounts(id) ON DELETE SET NULL,
     amount NUMERIC(15,2) NOT NULL CHECK (amount > 0),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    status VARCHAR(10) NOT NULL CHECK (status IN ('Success', 'Failed')),
-    error_message TEXT
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Index for faster lookup of accounts by user
-CREATE INDEX idx_accounts_user_id ON accounts(user_id);
+-- Insert demo user
+INSERT INTO users (name, email, password_hash) VALUES (
+    'John Doe',
+    'johndoe@example.com',
+    '$2a$12$v6Bg98bCJU8LtQRSAsnj5u6EsCJP3zWLtd0N0Vu1Z/WIaZKboeqtG'
+);
 
--- Indexes for faster transaction lookups
-CREATE INDEX idx_transactions_from_account ON transactions(from_account_id);
-CREATE INDEX idx_transactions_to_account ON transactions(to_account_id);
-
--- Attach trigger to users table
-CREATE TRIGGER update_users_updated_at
-BEFORE UPDATE ON users
-FOR EACH ROW
-EXECUTE PROCEDURE update_updated_at_column();
+-- Insert two demo accounts
+INSERT INTO accounts (user_id, account_number, account_name, balance) VALUES
+((SELECT id FROM users WHERE email='johndoe@example.com'), '1111111111', 'Demo Account 1', 1000.00),
+((SELECT id FROM users WHERE email='johndoe@example.com'), '2222222222', 'Demo Account 2', 500.00);
