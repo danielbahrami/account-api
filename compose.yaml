@@ -11,8 +11,9 @@ services:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_DB: account_api
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "9090:9090"
 
@@ -22,12 +23,12 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: account_api
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/data
+      - postgres_data:/var/lib/postgresql/data
       - ./internal/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   adminer:
