@@ -78,6 +78,11 @@ func createAccountHandler(w http.ResponseWriter, r *http.Request, dbpool *pgxpoo
 	}
 
 	// Create account
+	if len(req.AccountName) == 0 || len(req.AccountName) > 20 {
+		http.Error(w, "Account name must be 1-20 characters", http.StatusBadRequest)
+		return
+	}
+
 	acc, err := createAccount(dbpool, userID, req.AccountName)
 	if err != nil {
 		http.Error(w, "Failed to create account", http.StatusInternalServerError)
