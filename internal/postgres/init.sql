@@ -24,14 +24,16 @@ CREATE TABLE transactions (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Insert demo user
-INSERT INTO users (name, email, password_hash) VALUES (
-    'John Doe',
-    'johndoe@example.com',
-    '$2a$12$v6Bg98bCJU8LtQRSAsnj5u6EsCJP3zWLtd0N0Vu1Z/WIaZKboeqtG'
-);
+-- Insert demo users
+INSERT INTO users (name, email, password_hash) VALUES
+('John Doe', 'johndoe@example.com', '$2a$12$doE8XUHGFNy/l3bvn05F6eRpZUv3JOE40w2aIgbG6PZP55YpMXHAe'),
+('Jane Doe', 'janedoe@example.com', '$2a$12$gleKw8KS0v7B.2LQ9WVjXuylOaSLHiLmkgQGkLidOR7J1yE2Iq/Gy');
 
--- Insert two demo accounts
+-- Insert demo accounts
 INSERT INTO accounts (user_id, account_number, account_name, balance) VALUES
-((SELECT id FROM users WHERE email='johndoe@example.com'), '1111111111', 'Demo Account 1', 1000.00),
-((SELECT id FROM users WHERE email='johndoe@example.com'), '2222222222', 'Demo Account 2', 500.00);
+((SELECT id FROM users WHERE email='johndoe@example.com'), '1111111111', 'Account 1', 500.00),
+((SELECT id FROM users WHERE email='johndoe@example.com'), '2222222222', 'Account 2', 1000.00);
+
+INSERT INTO accounts (user_id, account_number, account_name, balance) VALUES
+((SELECT id FROM users WHERE email='janedoe@example.com'), '3333333333', 'Account 3', 750.00),
+((SELECT id FROM users WHERE email='janedoe@example.com'), '4444444444', 'Account 4', 1500.00);
