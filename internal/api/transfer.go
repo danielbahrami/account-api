@@ -28,6 +28,11 @@ func transferHandler(w http.ResponseWriter, r *http.Request, dbpool *pgxpool.Poo
 		return
 	}
 
+	if req.FromAccountNumber == req.ToAccountNumber {
+		http.Error(w, "Cannot transfer to the same account", http.StatusBadRequest)
+		return
+	}
+
 	userID, ok := userIDFromContext(r.Context())
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -58,7 +63,7 @@ func transferFunds(db *pgxpool.Pool, userID int, fromNumber, toNumber string, am
 	// Check source account ownership and balance
 	var fromBalance float64
 	var fromID int
-	err = tx.QueryRow(ctx, "SELECT id, balance FROM accounts WHERE account_number=$1 AND user_id = $2 FOR UPDATE", fromNumber, userID).Scan(&fromID, &fromBalance)
+	err = tx.QueryRow(ctx, "SELECT id, balance FROM accounts WHERE account_number = $1 AND user_id = $2 FOR UPDATE", fromNumber, userID).Scan(&fromID, &fromBalance)
 	if err != nil {
 		return fmt.Errorf("source account not found or not owned by user")
 	}
@@ -69,7 +74,7 @@ func transferFunds(db *pgxpool.Pool, userID int, fromNumber, toNumber string, am
 
 	// Get destination account
 	var toID int
-	err = tx.QueryRow(ctx, "SELECT id FROM accounts WHERE account_number=$1 FOR UPDATE", toNumber).Scan(&toID)
+	err = tx.QueryRow(ctx, "SELECT id FROM accounts WHERE account_number = $1 FOR UPDATE", toNumber).Scan(&toID)
 	if err != nil {
 		return fmt.Errorf("destination account not found")
 	}
